@@ -31,6 +31,4 @@ COPY . .
 RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 COPY --from=frontend /app/public/build ./public/build
 
-RUN cp .env.example .env
-
 CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
