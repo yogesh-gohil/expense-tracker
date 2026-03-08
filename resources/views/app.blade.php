@@ -4,11 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>BudgetBeacon</title>
+        <title>Expense Tracker</title>
 
         <script>
             (() => {
-                const key = 'budgetbeacon-theme';
+                const key = 'expense-tracker-theme';
                 const savedTheme = localStorage.getItem(key);
                 const isDark = savedTheme
                     ? savedTheme === 'dark'

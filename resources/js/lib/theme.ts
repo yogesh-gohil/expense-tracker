@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 
 type Theme = 'light' | 'dark'
 
-const THEME_STORAGE_KEY = 'budgetbeacon-theme'
+const THEME_STORAGE_KEY = 'expense-tracker-theme'
 const theme = ref<Theme>('light')
 
 const resolveTheme = (): Theme => {

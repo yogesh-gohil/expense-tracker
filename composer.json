@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "budgetbeacon/budgetbeacon",
+    "name": "expense-tracker/expense-tracker",
     "type": "project",
-    "description": "BudgetBeacon personal finance tracker.",
+    "description": "Expense Tracker personal finance tracker.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
