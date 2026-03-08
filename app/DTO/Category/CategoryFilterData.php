@@ -20,7 +20,7 @@ class CategoryFilterData
         return new self(
             userId: (int) $request->user()->id,
             limit: $limit === 'all' ? 'all' : (int) $limit,
-            type: $request->filled('type') ? (string) $request->query('type') : null,
+            type: $request->filled('type') ? strtoupper(trim((string) $request->query('type'))) : null,
             search: $request->filled('search') ? (string) $request->query('search') : null,
         );
     }

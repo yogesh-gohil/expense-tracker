@@ -53,6 +53,8 @@ const isEdit = computed(() => incomeStore.incomeData?.id)
 watch(
   () => incomeStore.showIncomeModal,
   (isOpen) => {
+    v$.value.$reset()
+
     if (isOpen) {
       categoryStore.fetchCategories({ type: 'INCOME' })
     }
@@ -79,6 +81,7 @@ const onSubmit = async () => {
       description: `Income ${isEdit.value ? 'Updated' : 'Added'} Successfully!`,
     })
 
+    v$.value.$reset()
     incomeStore.resetIncomeData()
   }
 }

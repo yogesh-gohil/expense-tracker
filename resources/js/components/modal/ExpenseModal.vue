@@ -73,6 +73,7 @@ const onSubmit = async () => {
       description: `Expense ${isEdit.value ? 'Updated': 'Added'} Successfully!`,
     })
 
+    v$.value.$reset()
     expenseStore.resetExpenseData()
   }
 }

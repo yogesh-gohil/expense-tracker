@@ -59,6 +59,7 @@ const onSubmit = async () => {
       description: `Category ${isEdit.value ? 'Updated': 'Added'} Successfully!`,
     })
 
+    v$.value.$reset()
     categoryStore.resetCategoryData()
   }
 }
