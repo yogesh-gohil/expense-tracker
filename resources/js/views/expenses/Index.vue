@@ -3,7 +3,7 @@ import ExpenseModal from '@/js/components/modal/ExpenseModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
 import BaseEmptyPlaceholder from '@/js/components/base/BaseEmptyPlaceholder.vue'
-import BaseBreadcrumb from '@/js/components/base/BaseBreadCrumb.vue'
+import BaseBreadcrumb from '@/js/components/base/BaseBreadcrumb.vue'
 import { useExpenseStore } from '@/js/stores/expense'
 import Expenses from '@/js/components/expenses/Expenses.vue'
 

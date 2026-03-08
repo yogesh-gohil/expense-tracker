@@ -2,7 +2,7 @@
 import IncomeModal from '@/js/components/modal/IncomeModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
-import BaseBreadcrumb from '@/js/components/base/BaseBreadCrumb.vue'
+import BaseBreadcrumb from '@/js/components/base/BaseBreadcrumb.vue'
 import { useIncomeStore } from '@/js/stores/income'
 import Incomes from '@/js/components/incomes/incomes.vue'
 
