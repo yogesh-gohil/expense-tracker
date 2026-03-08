@@ -30,5 +30,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 COPY --from=frontend /app/public/build ./public/build
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 
-CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
+CMD ["sh", "-c", "test -n \"$APP_KEY\" || (echo 'APP_KEY is missing. Set it in Render env vars.' && exit 1); php artisan migrate --force && php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
