@@ -65,7 +65,7 @@ export const useAuthStore = defineStore({
     logout() {
       return new Promise((resolve, reject) => {
         axios
-          .post('/api/logout')
+          .post('/logout')
           .then((response) => {
             router.replace('/login')
             resolve(response)
