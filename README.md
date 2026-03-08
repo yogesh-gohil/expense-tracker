@@ -18,7 +18,7 @@ It helps users track expenses, categories, monthly summaries, and profile settin
 - Backend: Laravel 11, Sanctum
 - Frontend: Vue 3, Pinia, Vite, Tailwind
 - Charts: Chart.js + vue-chartjs
-- Database: SQLite (local) / MySQL (production)
+- Database: SQLite (local) / PostgreSQL (Render free tier)
 
 ## Local Setup
 
@@ -60,7 +60,8 @@ This repository includes:
 1. Push your repository to GitHub.
 2. In Render, create a new **Blueprint** deployment and select this repo.
 3. Render will detect `render.yaml` and create the web service.
-4. Set required environment variables in Render dashboard:
+4. In Render, create a free PostgreSQL instance and copy its connection values.
+5. Set required environment variables in Render dashboard:
    - `APP_URL`
    - `APP_KEY`
    - `DB_HOST`
@@ -68,12 +69,18 @@ This repository includes:
    - `DB_DATABASE`
    - `DB_USERNAME`
    - `DB_PASSWORD`
-5. Attach a managed MySQL/PostgreSQL database (or external DB) and update `DB_*` values.
-6. Deploy.
+6. Generate your app key locally and paste it into Render (`APP_KEY`):
+
+```bash
+php artisan key:generate --show
+```
+
+7. Deploy.
 
 ## Production Notes
 
 - `APP_DEBUG=false` in production.
 - Use strong `APP_KEY` and database credentials.
+- `DB_CONNECTION` is set to `pgsql` in `render.yaml`.
 - Run with HTTPS only.
 - Configure backups for your production database.

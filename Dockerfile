@@ -24,14 +24,14 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring intl zip \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring intl zip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 
-RUN cp .env.example .env \
-    && php artisan key:generate --force
+RUN cp .env.example .env
 
 CMD ["sh", "-c", "php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"]
