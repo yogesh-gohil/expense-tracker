@@ -5,6 +5,7 @@ RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interacti
 
 FROM node:20-alpine AS frontend
 WORKDIR /app
+RUN corepack enable && corepack prepare yarn@1.22.21 --activate
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY resources ./resources
