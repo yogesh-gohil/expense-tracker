@@ -1,8 +1,3 @@
-FROM composer:2 AS vendor
-WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
-
 FROM node:20-alpine AS frontend
 WORKDIR /app
 RUN corepack enable && corepack prepare yarn@1.22.21 --activate
@@ -15,6 +10,8 @@ RUN yarn build
 
 FROM php:8.3-cli
 WORKDIR /app
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -29,8 +26,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring intl zip \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
-COPY --from=vendor /app/vendor ./vendor
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 COPY --from=frontend /app/public/build ./public/build
 
 RUN cp .env.example .env
