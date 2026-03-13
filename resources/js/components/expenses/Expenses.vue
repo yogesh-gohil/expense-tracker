@@ -1,5 +1,6 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, computed } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useExpenseStore } from '@/js/stores/expense'
 import { useAuthStore } from '@/js/stores/auth'
 import { useCopilotStore } from '@/js/stores/copilot'
@@ -13,18 +14,27 @@ import Textarea from '../ui/textarea/Textarea.vue'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
 
 
+const props = defineProps({
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
 const expenseStore = useExpenseStore()
 const authStore = useAuthStore()
 const copilotStore = useCopilotStore()
 
 const isLoading = ref(false)
-const params = reactive({
+const params = computed(() => ({
   expand: 'category',
-})
+  ...props.filters,
+}))
+const hasActiveFilters = computed(() => Object.keys(props.filters || {}).length > 0)
 
 const fetchExpenses = async () => {
   isLoading.value = true
-  await expenseStore.fetchExpenses(params)
+  await expenseStore.fetchExpenses(params.value)
   isLoading.value = false
 }
 const editExpense = (expense) => {
@@ -34,7 +44,13 @@ const editExpense = (expense) => {
 
 const formatMoney = (amount) => formatCurrencyFromCents(amount, authStore.currentUser?.currency)
 
-fetchExpenses()
+watchDebounced(
+  () => props.filters,
+  () => {
+    fetchExpenses()
+  },
+  { deep: true, debounce: 300, maxWait: 800, immediate: true },
+)
 </script>
 
 <template>
@@ -76,7 +92,11 @@ fetchExpenses()
     </div>
 
 
-  <BaseEmptyPlaceholder v-if="!expenseStore.expenses.length && !isLoading" title="No Expenses" description="You have not created any expenses yet.">
+  <BaseEmptyPlaceholder
+    v-if="!expenseStore.expenses.length && !isLoading && !hasActiveFilters"
+    title="No Expenses"
+    description="You have not created any expenses yet."
+  >
     <template #default>
       <Button
         variant="outline"
@@ -88,4 +108,9 @@ fetchExpenses()
       </Button>
     </template>
   </BaseEmptyPlaceholder>
+  <BaseEmptyPlaceholder
+    v-if="!expenseStore.expenses.length && !isLoading && hasActiveFilters"
+    title="No Records Found"
+    description="No expenses match the applied filters."
+  />
 </template>

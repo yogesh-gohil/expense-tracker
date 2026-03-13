@@ -19,16 +19,8 @@ class IncomeService
     {
         $query = Income::query()
             ->with('category')
-            ->where('user_id', $filter->userId)
+            ->applyFilters($filter->toArray())
             ->latest();
-
-        if ($filter->categoryId !== null) {
-            $query->where('category_id', $filter->categoryId);
-        }
-
-        if ($filter->search !== null) {
-            $query->where('title', 'LIKE', '%'.$filter->search.'%');
-        }
 
         if ($filter->limit === 'all') {
             return $query->get();

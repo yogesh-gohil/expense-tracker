@@ -10,6 +10,8 @@ class IncomeFilterData
         public readonly int $userId,
         public readonly int|string $limit = 15,
         public readonly ?int $categoryId = null,
+        public readonly ?int $month = null,
+        public readonly ?int $year = null,
         public readonly ?string $search = null,
     ) {}
 
@@ -21,7 +23,21 @@ class IncomeFilterData
             userId: (int) $request->user()->id,
             limit: $limit === 'all' ? 'all' : (int) $limit,
             categoryId: $request->filled('category_id') ? (int) $request->query('category_id') : null,
+            month: $request->filled('month') ? (int) $request->query('month') : null,
+            year: $request->filled('year') ? (int) $request->query('year') : null,
             search: $request->filled('search') ? (string) $request->query('search') : null,
         );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'user_id' => $this->userId,
+            'limit' => $this->limit,
+            'category_id' => $this->categoryId,
+            'month' => $this->month,
+            'year' => $this->year,
+            'search' => $this->search,
+        ];
     }
 }

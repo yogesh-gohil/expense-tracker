@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Builder\IncomeBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,5 +25,10 @@ class Income extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function newEloquentBuilder($builder)
+    {
+        return new IncomeBuilder($builder);
     }
 }

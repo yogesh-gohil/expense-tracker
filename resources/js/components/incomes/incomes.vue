@@ -1,5 +1,6 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, computed } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useIncomeStore } from '@/js/stores/income'
 import { useAuthStore } from '@/js/stores/auth'
 import CardItem from '@/js/components/base/CardItem.vue'
@@ -11,16 +12,25 @@ import { Plus } from 'lucide-vue-next'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
 
 
+const props = defineProps({
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
 const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
 const isLoading = ref(false)
-const params = reactive({
+const params = computed(() => ({
   expand: 'category',
-})
+  ...props.filters,
+}))
+const hasActiveFilters = computed(() => Object.keys(props.filters || {}).length > 0)
 
 const fetchIncomes = async () => {
   isLoading.value = true
-  await incomeStore.fetchIncomes(params)
+  await incomeStore.fetchIncomes(params.value)
   isLoading.value = false
 }
 const editIncome = (income) => {
@@ -30,7 +40,13 @@ const editIncome = (income) => {
 
 const formatMoney = (amount) => formatCurrencyFromCents(amount, authStore.currentUser?.currency)
 
-fetchIncomes()
+watchDebounced(
+  () => props.filters,
+  () => {
+    fetchIncomes()
+  },
+  { deep: true, debounce: 300, maxWait: 800, immediate: true },
+)
 </script>
 
 <template>
@@ -59,7 +75,11 @@ fetchIncomes()
     </div>
 
 
-  <BaseEmptyPlaceholder v-if="!incomeStore.incomes.length && !isLoading" title="No Incomes" description="You have not created any incomes record yet.">
+  <BaseEmptyPlaceholder
+    v-if="!incomeStore.incomes.length && !isLoading && !hasActiveFilters"
+    title="No Incomes"
+    description="You have not created any incomes record yet."
+  >
     <template #default>
       <Button
         variant="outline"
@@ -71,4 +91,9 @@ fetchIncomes()
       </Button>
     </template>
   </BaseEmptyPlaceholder>
+  <BaseEmptyPlaceholder
+    v-if="!incomeStore.incomes.length && !isLoading && hasActiveFilters"
+    title="No Records Found"
+    description="No incomes match the applied filters."
+  />
 </template>
