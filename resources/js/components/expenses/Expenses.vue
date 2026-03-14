@@ -9,7 +9,10 @@ import Button from '@/js/components/ui/button/Button.vue'
 import Skeleton from '@/js/components/ui/skeleton/Skeleton.vue'
 import BaseEmptyPlaceholder from '@/js/components/base/BaseEmptyPlaceholder.vue'
 import { Badge } from '@/js/components/ui/badge'
-import { Plus } from 'lucide-vue-next'
+import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Trash2 } from 'lucide-vue-next'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/js/components/ui/table'
+import ConfirmDialog from '@/js/components/base/ConfirmDialog.vue'
+import { useToast } from '@/js/components/ui/toast/use-toast'
 import Textarea from '../ui/textarea/Textarea.vue'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
 
@@ -19,18 +22,29 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  view: {
+    type: String,
+    default: 'card',
+  },
 })
 
 const expenseStore = useExpenseStore()
 const authStore = useAuthStore()
 const copilotStore = useCopilotStore()
+const { toast } = useToast()
 
 const isLoading = ref(false)
+const sortBy = ref(null)
+const sortDir = ref('desc')
+const isDeleteDialogOpen = ref(false)
+const expenseToDelete = ref(null)
 const params = computed(() => ({
   expand: 'category',
   ...props.filters,
+  ...(sortBy.value ? { sort_by: sortBy.value, sort_dir: sortDir.value } : {}),
 }))
 const hasActiveFilters = computed(() => Object.keys(props.filters || {}).length > 0)
+const isTableView = computed(() => props.view === 'table')
 
 const fetchExpenses = async () => {
   isLoading.value = true
@@ -44,8 +58,49 @@ const editExpense = (expense) => {
 
 const formatMoney = (amount) => formatCurrencyFromCents(amount, authStore.currentUser?.currency)
 
+const requestDelete = (expense) => {
+  expenseToDelete.value = expense
+  isDeleteDialogOpen.value = true
+}
+
+const confirmDelete = async () => {
+  if (!expenseToDelete.value) return
+  try {
+    await expenseStore.removeExpense(expenseToDelete.value.id)
+    toast({
+      title: 'Deleted',
+      description: 'Expense deleted successfully.',
+    })
+  } catch (error) {
+    const message = error?.response?.data?.message || 'Unable to delete this expense.'
+    toast({
+      title: 'Delete failed',
+      description: message,
+      variant: 'destructive',
+    })
+  } finally {
+    isDeleteDialogOpen.value = false
+    expenseToDelete.value = null
+  }
+}
+
+const toggleSort = (key) => {
+  if (sortBy.value === key) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+    return
+  }
+
+  sortBy.value = key
+  sortDir.value = 'asc'
+}
+
+const sortIcon = (key) => {
+  if (sortBy.value !== key) return ArrowUpDown
+  return sortDir.value === 'asc' ? ArrowUp : ArrowDown
+}
+
 watchDebounced(
-  () => props.filters,
+  () => [props.filters, sortBy.value, sortDir.value],
   () => {
     fetchExpenses()
   },
@@ -76,8 +131,13 @@ watchDebounced(
         </div>
       </div>
     </div>
-    <div v-else>
-      <CardItem v-for="expense in expenseStore.expenses" :key="expense.id" @edit="editExpense(expense)">
+    <div v-else-if="!isTableView">
+      <CardItem
+        v-for="expense in expenseStore.expenses"
+        :key="expense.id"
+        @edit="editExpense(expense)"
+        @delete="requestDelete(expense)"
+      >
         <template #title>
           <div class="flex items-center justify-between space-x-4">
             <span>{{ expense.title }}</span>
@@ -89,6 +149,61 @@ watchDebounced(
             {{ expense.description }}
         </template>
       </CardItem>
+    </div>
+    <div v-else>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <button class="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground" @click="toggleSort('title')">
+                Name <component :is="sortIcon('title')" class="h-3 w-3" />
+              </button>
+            </TableHead>
+            <TableHead>
+              <button class="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground" @click="toggleSort('category_name')">
+                Category <component :is="sortIcon('category_name')" class="h-3 w-3" />
+              </button>
+            </TableHead>
+            <TableHead>
+              <button class="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground" @click="toggleSort('date')">
+                Date <component :is="sortIcon('date')" class="h-3 w-3" />
+              </button>
+            </TableHead>
+            <TableHead class="text-right">
+              <button class="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground" @click="toggleSort('amount')">
+                Amount <component :is="sortIcon('amount')" class="h-3 w-3" />
+              </button>
+            </TableHead>
+            <TableHead class="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="expense in expenseStore.expenses" :key="expense.id">
+            <TableCell class="font-medium">
+              <div>{{ expense.title }}</div>
+              <div v-if="expense.description" class="text-xs text-muted-foreground">
+                {{ expense.description }}
+              </div>
+            </TableCell>
+            <TableCell>{{ expense.category?.name ?? '—' }}</TableCell>
+            <TableCell>{{ expense.date }}</TableCell>
+            <TableCell class="text-right text-primary">{{ formatMoney(expense.amount) }}</TableCell>
+            <TableCell class="text-right">
+              <div class="flex items-center justify-end gap-2">
+                <Button variant="ghost" size="xs" @click="editExpense(expense)">Edit</Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  class="text-red-500 hover:text-red-600"
+                  @click="requestDelete(expense)"
+                >
+                  <Trash2 class="h-4 w-4" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
 
 
@@ -112,5 +227,13 @@ watchDebounced(
     v-if="!expenseStore.expenses.length && !isLoading && hasActiveFilters"
     title="No Records Found"
     description="No expenses match the applied filters."
+  />
+
+  <ConfirmDialog
+    v-model:open="isDeleteDialogOpen"
+    title="Delete expense?"
+    description="This will permanently delete the expense."
+    confirm-text="Delete"
+    @confirm="confirmDelete"
   />
 </template>

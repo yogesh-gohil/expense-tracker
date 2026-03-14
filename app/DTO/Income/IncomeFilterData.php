@@ -12,6 +12,8 @@ class IncomeFilterData
         public readonly ?int $categoryId = null,
         public readonly ?int $month = null,
         public readonly ?int $year = null,
+        public readonly ?string $sortBy = null,
+        public readonly ?string $sortDir = null,
         public readonly ?string $search = null,
     ) {}
 
@@ -25,6 +27,8 @@ class IncomeFilterData
             categoryId: $request->filled('category_id') ? (int) $request->query('category_id') : null,
             month: $request->filled('month') ? (int) $request->query('month') : null,
             year: $request->filled('year') ? (int) $request->query('year') : null,
+            sortBy: $request->filled('sort_by') ? (string) $request->query('sort_by') : null,
+            sortDir: $request->filled('sort_dir') ? (string) $request->query('sort_dir') : null,
             search: $request->filled('search') ? (string) $request->query('search') : null,
         );
     }
@@ -37,6 +41,8 @@ class IncomeFilterData
             'category_id' => $this->categoryId,
             'month' => $this->month,
             'year' => $this->year,
+            'sort_by' => $this->sortBy,
+            'sort_dir' => $this->sortDir,
             'search' => $this->search,
         ];
     }

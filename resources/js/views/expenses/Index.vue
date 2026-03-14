@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import ExpenseModal from '@/js/components/modal/ExpenseModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
@@ -9,9 +9,11 @@ import { useExpenseStore } from '@/js/stores/expense'
 import Expenses from '@/js/components/expenses/Expenses.vue'
 import { useCategoryStore } from '@/js/stores/category'
 import TransactionFilters from '@/js/components/filters/TransactionFilters.vue'
+import ViewToggle from '@/js/components/filters/ViewToggle.vue'
 
 const expenseStore = useExpenseStore()
 const categoryStore = useCategoryStore()
+const isTableView = ref(true)
 
 const breadcrumbData = [
   { title: 'Home', href:"/dashboard", active: false },
@@ -69,8 +71,17 @@ onMounted(() => {
     id-prefix="expense"
     @reset="resetFilters"
   />
-  
-  <Expenses :filters="normalizedFilters" />
+  <div class="mb-4 flex items-center justify-end">
+    <ViewToggle
+      v-model:isTableView="isTableView"
+      active-class="bg-primary/80 text-white"
+      hover-class="hover:bg-primary hover:text-white"
+      wrapper-class="inline-flex items-center rounded-md border bg-card p-1"
+      gap-class="inline-flex items-center gap-1"
+     />
+  </div>
+
+  <Expenses :filters="normalizedFilters" :view="isTableView ? 'table' : 'card'" />
 
   <ExpenseModal />
 </template>

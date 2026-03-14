@@ -9,6 +9,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CategoryService
 {
@@ -61,6 +62,12 @@ class CategoryService
     public function delete(Category $category, int $userId): void
     {
         $this->ensureOwnedByUser($category, $userId);
+
+        if ($category->expenses()->exists() || $category->incomes()->exists()) {
+            throw ValidationException::withMessages([
+                'category' => 'This category is already used in expenses or incomes and cannot be deleted.',
+            ]);
+        }
 
         DB::transaction(function () use ($category) {
             $category->delete();

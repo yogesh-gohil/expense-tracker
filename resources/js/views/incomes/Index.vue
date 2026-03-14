@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import IncomeModal from '@/js/components/modal/IncomeModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
@@ -8,9 +8,11 @@ import { useIncomeStore } from '@/js/stores/income'
 import Incomes from '@/js/components/incomes/incomes.vue'
 import { useCategoryStore } from '@/js/stores/category'
 import TransactionFilters from '@/js/components/filters/TransactionFilters.vue'
+import ViewToggle from '@/js/components/filters/ViewToggle.vue'
 
 const incomeStore = useIncomeStore()
 const categoryStore = useCategoryStore()
+const isTableView = ref(true)
 
 const breadcrumbData = [
   { title: 'Home', href:"/dashboard", active: false },
@@ -67,6 +69,15 @@ onMounted(() => {
     id-prefix="income"
     @reset="resetFilters"
   />
+  <div class="mb-4 flex items-center justify-end">
+    <ViewToggle
+      v-model:isTableView="isTableView"
+      active-class="bg-primary/80 text-white"
+      hover-class="hover:bg-primary hover:text-white"
+      wrapper-class="inline-flex items-center rounded-md border bg-card p-1"
+      gap-class="inline-flex items-center gap-1"
+    />
+  </div>
 <!--
   <BaseEmptyPlaceholder  title="No Incomes" description="You have not created any Incomes yet.">
     <template #default>
@@ -79,6 +90,6 @@ onMounted(() => {
       </Button>
     </template>
   </BaseEmptyPlaceholder> -->
-  <Incomes :filters="normalizedFilters" />
+  <Incomes :filters="normalizedFilters" :view="isTableView ? 'table' : 'card'" />
   <IncomeModal />
 </template>
