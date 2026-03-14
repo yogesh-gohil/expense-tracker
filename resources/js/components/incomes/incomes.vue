@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { watchDebounced } from '@vueuse/core'
 import { useIncomeStore } from '@/js/stores/income'
 import { useAuthStore } from '@/js/stores/auth'
@@ -11,7 +11,9 @@ import { Badge } from '@/js/components/ui/badge'
 import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Trash2 } from 'lucide-vue-next'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/js/components/ui/table'
 import ConfirmDialog from '@/js/components/base/ConfirmDialog.vue'
+import Paginator from '@/js/components/base/Paginator.vue'
 import { useToast } from '@/js/components/ui/toast/use-toast'
+import TableLoading from '@/js/components/base/TableLoading.vue'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
 
 
@@ -29,23 +31,30 @@ const props = defineProps({
 const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
 const { toast } = useToast()
-const isLoading = ref(false)
+const isLoading = ref(true)
 const sortBy = ref(null)
 const sortDir = ref('desc')
+const page = ref(1)
+const limit = ref(10)
 const isDeleteDialogOpen = ref(false)
 const incomeToDelete = ref(null)
 const params = computed(() => ({
   expand: 'category',
   ...props.filters,
   ...(sortBy.value ? { sort_by: sortBy.value, sort_dir: sortDir.value } : {}),
+  page: page.value,
+  limit: limit.value,
 }))
 const hasActiveFilters = computed(() => Object.keys(props.filters || {}).length > 0)
 const isTableView = computed(() => props.view === 'table')
 
 const fetchIncomes = async () => {
   isLoading.value = true
-  await incomeStore.fetchIncomes(params.value)
-  isLoading.value = false
+  try {
+    await incomeStore.fetchIncomes(params.value)
+  } finally {
+    isLoading.value = false
+  }
 }
 const editIncome = (income) => {
   incomeStore.incomeData = {...income}
@@ -68,12 +77,7 @@ const confirmDelete = async () => {
       description: 'Income deleted successfully.',
     })
   } catch (error) {
-    const message = error?.response?.data?.message || 'Unable to delete this income.'
-    toast({
-      title: 'Delete failed',
-      description: message,
-      variant: 'destructive',
-    })
+    // Error toasts are handled globally by axios interceptor.
   } finally {
     isDeleteDialogOpen.value = false
     incomeToDelete.value = null
@@ -96,16 +100,34 @@ const sortIcon = (key) => {
 }
 
 watchDebounced(
-  () => [props.filters, sortBy.value, sortDir.value],
+  () => [props.filters, sortBy.value, sortDir.value, page.value, limit.value],
   () => {
     fetchIncomes()
   },
   { deep: true, debounce: 300, maxWait: 800, immediate: true },
 )
+
+watch(
+  () => props.filters,
+  () => {
+    page.value = 1
+  },
+  { deep: true },
+)
+
+watch(
+  () => incomeStore.pagination?.last_page,
+  (lastPage) => {
+    if (!lastPage) return
+    if (page.value > lastPage) {
+      page.value = Math.max(1, lastPage)
+    }
+  },
+)
 </script>
 
 <template>
-    <div v-if="isLoading" >
+    <div v-if="isLoading && !isTableView">
       <div v-for="i in 4" class="flex items-center border space-x-4 bg-gray-50 dark:bg-gray-900 p-4 mb-4 rounded-lg">
         <Skeleton class="h-12 w-12 rounded-full" />
         <div class="space-y-2">
@@ -113,6 +135,9 @@ watchDebounced(
           <Skeleton class="h-4 w-[200px]" />
         </div>
       </div>
+    </div>
+    <div v-else-if="isLoading && isTableView">
+      <TableLoading />
     </div>
     <div v-else-if="!isTableView">
       <CardItem
@@ -134,7 +159,8 @@ watchDebounced(
       </CardItem>
     </div>
     <div v-else>
-      <Table>
+      <div class="rounded-lg border bg-card overflow-hidden">
+        <Table unstyled>
         <TableHeader>
           <TableRow>
             <TableHead>
@@ -190,9 +216,22 @@ watchDebounced(
             </TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+        </Table>
+        <div v-if="incomeStore.pagination?.total > limit" class="border-t bg-background px-4 py-3">
+          <Paginator
+            :meta="incomeStore.pagination"
+            @page-change="page = $event"
+          />
+        </div>
+      </div>
     </div>
 
+  <div
+    v-if="!isTableView && incomeStore.pagination?.total > limit"
+    class="mt-4"
+  >
+    <Paginator :meta="incomeStore.pagination" @page-change="page = $event" />
+  </div>
 
   <BaseEmptyPlaceholder
     v-if="!incomeStore.incomes.length && !isLoading && !hasActiveFilters"

@@ -4,11 +4,21 @@ import { cn } from '@/js/lib/utils'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
+  wrapperClass?: HTMLAttributes['class']
+  unstyled?: boolean
 }>()
 </script>
 
 <template>
-  <div class="relative w-full overflow-x-auto rounded-lg border bg-card">
+  <div
+    :class="
+      cn(
+        'relative w-full overflow-x-auto',
+        !props.unstyled && 'rounded-lg border bg-card',
+        props.wrapperClass,
+      )
+    "
+  >
     <table :class="cn('w-full min-w-[720px] caption-bottom text-sm', props.class)">
       <slot />
     </table>

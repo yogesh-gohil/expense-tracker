@@ -19,6 +19,7 @@ const props = defineProps({
 
 const isDeleteDialogOpen = ref(false)
 const categoryToDelete = ref(null)
+const isDeleting = ref(false)
 
 const requestDelete = (category) => {
   categoryToDelete.value = category
@@ -27,6 +28,8 @@ const requestDelete = (category) => {
 
 const confirmDelete = async () => {
   if (!categoryToDelete.value) return
+  if (isDeleting.value) return
+  isDeleting.value = true
   try {
     await categoryStore.removeCategory(categoryToDelete.value.id)
     toast({
@@ -34,17 +37,11 @@ const confirmDelete = async () => {
       description: 'Category deleted successfully.',
     })
   } catch (error) {
-    const message = error?.response?.data?.message
-      || error?.response?.data?.errors?.category?.[0]
-      || 'Unable to delete this category.'
-    toast({
-      title: 'Delete failed',
-      description: message,
-      variant: 'destructive',
-    })
+    // Error toasts are handled globally by axios interceptor.
   } finally {
     isDeleteDialogOpen.value = false
     categoryToDelete.value = null
+    isDeleting.value = false
   }
 }
 </script>
@@ -78,6 +75,7 @@ const confirmDelete = async () => {
     title="Delete category?"
     description="This will permanently delete the category."
     confirm-text="Delete"
+    :loading="isDeleting"
     @confirm="confirmDelete"
   />
 </template>

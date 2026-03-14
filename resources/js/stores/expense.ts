@@ -5,13 +5,15 @@ export const useExpenseStore = defineStore({
   id: 'expense',
   state: () => ({
     expenses: [],
+    pagination: null,
+    lastFetchParams: null,
     monthlySummary: null,
     showExpenseModal: false,
     expenseData: {
       title: '',
       description: '',
       amount: 0,
-      date: '',
+      date: new Date().toISOString().slice(0, 10),
       category_id: '',
     },
 
@@ -23,20 +25,34 @@ export const useExpenseStore = defineStore({
         title: '',
         description: '',
         amount: 0,
-        date: '',
+        date: new Date().toISOString().slice(0, 10),
         category_id: '',
       }
     },
     fetchExpenses(data: any) {
       return new Promise((resolve, reject) => {
+        this.lastFetchParams = data
         axios.get('/api/expenses', { params: data })
         .then((response) => {
           this.expenses = response.data.data
+          this.pagination = response.data.meta ?? {
+            current_page: 1,
+            last_page: 1,
+            per_page: this.expenses.length,
+            total: this.expenses.length,
+            from: this.expenses.length ? 1 : 0,
+            to: this.expenses.length,
+          }
           resolve(response)
         }).catch((e) => {
           reject(e)
         })
       })
+    },
+    refreshExpenses() {
+      if (!this.lastFetchParams)
+        return Promise.resolve()
+      return this.fetchExpenses(this.lastFetchParams)
     },
     fetchMonthlySummary(params: any = {}) {
       return new Promise((resolve, reject) => {
@@ -63,8 +79,12 @@ export const useExpenseStore = defineStore({
     addExpense(data: any) {
       return new Promise((resolve, reject) => {
         axios.post('/api/expenses', data)
-        .then((response) => {
-          this.expenses.push(response.data.data)
+        .then(async (response) => {
+          if (this.lastFetchParams) {
+            await this.fetchExpenses(this.lastFetchParams)
+          } else {
+            this.expenses.push(response.data.data)
+          }
           this.resetExpenseData()
           resolve(response)
         }).catch((e) => {
@@ -75,9 +95,13 @@ export const useExpenseStore = defineStore({
     updateExpense(data: any) {
       return new Promise((resolve, reject) => {
         axios.put(`/api/expenses/${data.id}`, data)
-        .then((response) => {
-          let index = this.expenses.findIndex((_e) => _e.id === data.id)
-          this.expenses[index] = response.data.data
+        .then(async (response) => {
+          if (this.lastFetchParams) {
+            await this.fetchExpenses(this.lastFetchParams)
+          } else {
+            let index = this.expenses.findIndex((_e) => _e.id === data.id)
+            this.expenses[index] = response.data.data
+          }
           resolve(response)
         }).catch((e) => {
           reject(e)
@@ -87,9 +111,13 @@ export const useExpenseStore = defineStore({
     removeExpense(id: any) {
       return new Promise((resolve, reject) => {
         axios.delete(`/api/expenses/${id}`)
-        .then((response) => {
-          let index = this.expenses.findIndex((_c) => _c.id === id)
-          this.expenses.splice(index, 1)
+        .then(async (response) => {
+          if (this.lastFetchParams) {
+            await this.fetchExpenses(this.lastFetchParams)
+          } else {
+            let index = this.expenses.findIndex((_c) => _c.id === id)
+            this.expenses.splice(index, 1)
+          }
           resolve(response)
         }).catch((e) => {
           reject(e)
