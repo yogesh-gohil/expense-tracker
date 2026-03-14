@@ -1,6 +1,5 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import IncomeModal from '@/js/components/modal/IncomeModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
 import BaseBreadcrumb from '@/js/components/base/BaseBreadcrumb.vue'
@@ -91,5 +90,4 @@ onMounted(() => {
     </template>
   </BaseEmptyPlaceholder> -->
   <Incomes :filters="normalizedFilters" :view="isTableView ? 'table' : 'card'" />
-  <IncomeModal />
 </template>

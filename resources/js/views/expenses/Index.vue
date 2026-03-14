@@ -1,6 +1,5 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import ExpenseModal from '@/js/components/modal/ExpenseModal.vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
 import BaseEmptyPlaceholder from '@/js/components/base/BaseEmptyPlaceholder.vue'
@@ -83,5 +82,4 @@ onMounted(() => {
 
   <Expenses :filters="normalizedFilters" :view="isTableView ? 'table' : 'card'" />
 
-  <ExpenseModal />
 </template>
