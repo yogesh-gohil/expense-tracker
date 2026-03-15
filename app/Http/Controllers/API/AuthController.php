@@ -34,6 +34,17 @@ class AuthController extends Controller
         ]);
     }
 
+    public function loginToken(LoginRequest $request)
+    {
+        $payload = $this->authService->loginWithToken(LoginData::fromRequest($request), $request);
+
+        return response()->json([
+            'user' => $payload['user'],
+            'token' => $payload['token'],
+            'message' => 'Token issued successfully',
+        ]);
+    }
+
     public function logout(Request $request)
     {
         $this->authService->logout($request);

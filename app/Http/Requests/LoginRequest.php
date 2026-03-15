@@ -33,6 +33,11 @@ class LoginRequest extends FormRequest
                 'string',
                 'min:8',
             ],
+            'device_name' => [
+                'sometimes',
+                'string',
+                'max:255',
+            ],
         ];
     }
 }
