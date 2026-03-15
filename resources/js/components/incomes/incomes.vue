@@ -15,6 +15,7 @@ import Paginator from '@/js/components/base/Paginator.vue'
 import { useToast } from '@/js/components/ui/toast/use-toast'
 import TableLoading from '@/js/components/base/TableLoading.vue'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
+import { getCategoryTone } from '@/js/lib/categoryColors'
 
 
 const props = defineProps({
@@ -62,6 +63,7 @@ const editIncome = (income) => {
 }
 
 const formatMoney = (amount) => formatCurrencyFromCents(amount, authStore.currentUser?.currency)
+const categoryTone = (name) => getCategoryTone(name)
 
 const requestDelete = (income) => {
   incomeToDelete.value = income
@@ -150,7 +152,14 @@ watch(
           <div class="flex items-center justify-between space-x-4">
             <span>{{ income.title }}</span>
             <span class="text-primary">{{ formatMoney(income.amount) }}</span>
-            <Badge variant="outline">{{income.category.name}}</Badge>
+            <Badge
+              variant="outline"
+              class="gap-2"
+              :class="categoryTone(income.category?.name).border"
+            >
+              <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(income.category?.name).dot"></span>
+              <span :class="categoryTone(income.category?.name).text">{{ income.category?.name ?? '—' }}</span>
+            </Badge>
           </div>
         </template>
         <template #description>
@@ -198,7 +207,12 @@ watch(
                 {{ income.description }}
               </div>
             </TableCell>
-            <TableCell>{{ income.category?.name ?? '—' }}</TableCell>
+            <TableCell>
+              <div class="inline-flex items-center gap-2">
+                <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(income.category?.name).dot"></span>
+                <span :class="categoryTone(income.category?.name).text">{{ income.category?.name ?? '—' }}</span>
+              </div>
+            </TableCell>
             <TableCell>{{ income.date }}</TableCell>
             <TableCell class="text-right text-primary">{{ formatMoney(income.amount) }}</TableCell>
             <TableCell class="text-right">

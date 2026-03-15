@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/login/token', [AuthController::class, 'loginToken'])->name('api.login.token');
 Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 
 Route::middleware(['auth:sanctum'])->group(function () {

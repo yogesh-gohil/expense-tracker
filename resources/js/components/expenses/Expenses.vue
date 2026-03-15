@@ -17,6 +17,7 @@ import { useToast } from '@/js/components/ui/toast/use-toast'
 import TableLoading from '@/js/components/base/TableLoading.vue'
 import Textarea from '../ui/textarea/Textarea.vue'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
+import { getCategoryTone } from '@/js/lib/categoryColors'
 
 
 const props = defineProps({
@@ -66,6 +67,7 @@ const editExpense = (expense) => {
 }
 
 const formatMoney = (amount) => formatCurrencyFromCents(amount, authStore.currentUser?.currency)
+const categoryTone = (name) => getCategoryTone(name)
 
 const requestDelete = (expense) => {
   expenseToDelete.value = expense
@@ -167,7 +169,14 @@ watch(
           <div class="flex items-center justify-between space-x-4">
             <span>{{ expense.title }}</span>
             <span class="text-primary">{{ formatMoney(expense.amount) }}</span>
-            <Badge variant="outline">{{expense.category.name}}</Badge>
+            <Badge
+              variant="outline"
+              class="gap-2"
+              :class="categoryTone(expense.category?.name).border"
+            >
+              <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(expense.category?.name).dot"></span>
+              <span :class="categoryTone(expense.category?.name).text">{{ expense.category?.name ?? '—' }}</span>
+            </Badge>
           </div>
         </template>
         <template #description>
@@ -211,7 +220,12 @@ watch(
                 {{ expense.description }}
               </div>
             </TableCell>
-            <TableCell>{{ expense.category?.name ?? '—' }}</TableCell>
+            <TableCell>
+              <div class="inline-flex items-center gap-2">
+                <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(expense.category?.name).dot"></span>
+                <span :class="categoryTone(expense.category?.name).text">{{ expense.category?.name ?? '—' }}</span>
+              </div>
+            </TableCell>
             <TableCell>{{ expense.date }}</TableCell>
             <TableCell class="text-right text-primary">{{ formatMoney(expense.amount) }}</TableCell>
             <TableCell class="text-right">
