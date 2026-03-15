@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import Button from '@/js/components/ui/button/Button.vue'
 import BaseEmptyPlaceholder from '@/js/components/base/BaseEmptyPlaceholder.vue'
@@ -9,10 +9,15 @@ import Expenses from '@/js/components/expenses/Expenses.vue'
 import { useCategoryStore } from '@/js/stores/category'
 import TransactionFilters from '@/js/components/filters/TransactionFilters.vue'
 import ViewToggle from '@/js/components/filters/ViewToggle.vue'
+import { useViewPreferenceStore } from '@/js/stores/viewPreference'
 
 const expenseStore = useExpenseStore()
 const categoryStore = useCategoryStore()
-const isTableView = ref(true)
+const viewPreferenceStore = useViewPreferenceStore()
+const isTableView = computed({
+  get: () => viewPreferenceStore.expenseView === 'table',
+  set: (value) => viewPreferenceStore.setExpenseView(value ? 'table' : 'card'),
+})
 
 const breadcrumbData = [
   { title: 'Home', href:"/dashboard", active: false },
@@ -47,6 +52,7 @@ const resetFilters = () => {
 }
 
 onMounted(() => {
+  viewPreferenceStore.initExpenseView()
   categoryStore.fetchCategories({ type: 'EXPENSE', limit: 'all' })
 })
 </script>

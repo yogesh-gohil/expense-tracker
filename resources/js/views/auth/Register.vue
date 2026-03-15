@@ -4,6 +4,7 @@ import { Button } from '@/js/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/js/components/ui/card'
 import { Input } from '@/js/components/ui/input'
 import { Label } from '@/js/components/ui/label'
+import BasePasswordInput from '@/js/components/base/BasePasswordInput.vue'
 import { useAuthStore } from '@/js/stores/auth'
 import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
@@ -90,20 +91,18 @@ const onSubmit = async () => {
           </div>
           <div class="grid gap-2">
             <Label for="password">Password</Label>
-            <Input
+            <BasePasswordInput
               v-model="authStore.registerData.password"
               :error="v$.password.$error && v$.password.$errors[0].$message"
               id="password"
-              type="password"
             />
           </div>
           <div class="grid gap-2">
             <Label for="c_password">Confirm Password</Label>
-            <Input
+            <BasePasswordInput
               v-model="authStore.registerData.password_confirmation"
               :error="v$.password_confirmation.$error && v$.password_confirmation.$errors[0].$message"
               id="c_password"
-              type="password"
             />
           </div>
           <Button type="submit" class="w-full">

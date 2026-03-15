@@ -10,6 +10,7 @@ import { Button } from '@/js/components/ui/button'
 import { Badge } from '@/js/components/ui/badge'
 import { Sparkles, Loader2, ArrowRight, X, Square, Command } from 'lucide-vue-next'
 import { formatCurrencyFromCents } from '@/js/lib/currency'
+import TypingTip from '@/js/components/copilot/TypingTip.vue'
 
 const copilotStore = useCopilotStore()
 const categoryStore = useCategoryStore()
@@ -18,7 +19,6 @@ const incomeStore = useIncomeStore()
 const authStore = useAuthStore()
 const { toast } = useToast()
 
-const isOpen = ref(false)
 const inputRef = ref<HTMLInputElement | null>(null)
 const progressIndex = ref(0)
 let progressTimer: ReturnType<typeof setInterval> | null = null
@@ -175,29 +175,25 @@ const openInForm = () => {
 }
 
 const openPalette = async () => {
-  copilotStore.reset()
-  copilotStore.prompt = ''
-  isOpen.value = true
+  copilotStore.openPalette()
   await nextTick()
   inputRef.value?.focus()
 }
 
 const closePalette = () => {
-  isOpen.value = false
-  copilotStore.reset()
-  copilotStore.prompt = ''
+  copilotStore.closePalette()
 }
 
 const handleShortcut = (event: KeyboardEvent) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault()
-    if (isOpen.value) {
+    if (copilotStore.isPaletteOpen) {
       inputRef.value?.focus()
     } else {
       openPalette()
     }
   }
-  if (event.key === 'Escape' && isOpen.value) {
+  if (event.key === 'Escape' && copilotStore.isPaletteOpen) {
     event.preventDefault()
     closePalette()
   }
@@ -222,6 +218,7 @@ const progressSteps = [
   'Preparing preview…',
 ]
 
+
 watch(
   () => copilotStore.isLoading,
   (isLoading) => {
@@ -238,27 +235,19 @@ watch(
   },
 )
 
+
 watch(
   () => copilotStore.result,
   (value) => {
-    if (value) isOpen.value = true
+    if (value) copilotStore.isPaletteOpen = true
   },
 )
 </script>
 
 <template>
   <div>
-    <button
-      type="button"
-      class="inline-flex items-center gap-2 rounded-none border-0 bg-transparent px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-      @click="openPalette"
-    >
-      <Command class="h-3.5 w-3.5" />
-      Copilot
-      <span class="rounded-sm border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.18em]">K</span>
-    </button>
 
-    <div v-if="isOpen" class="fixed inset-0 z-50">
+    <div v-if="copilotStore.isPaletteOpen" class="fixed inset-0 z-50">
       <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closePalette"></div>
       <div class="absolute left-1/2 top-20 w-[min(720px,92vw)] -translate-x-1/2">
         <div class="rounded-md border-0 bg-background shadow-2xl">
@@ -372,9 +361,15 @@ watch(
               </div>
             </div>
 
-            <div v-else-if="!copilotStore.isLoading" class="mt-6 text-xs text-muted-foreground">
-              Tip: Try “Pay rent $1200”, “Earn 5000 from freelancing”, or “Coffee at Starbucks 6.5”.
-            </div>
+            <TypingTip
+              v-else-if="!copilotStore.isLoading"
+              class="mt-6"
+              :tips="['Pay rent $1200', 'Earn 5000 from freelancing', 'Coffee at Starbucks 6.5']"
+              prefix="Tip:"
+              :is-active="copilotStore.isPaletteOpen && !copilotStore.isLoading && !result"
+              :hold-ms="4000"
+              :type-speed-ms="35"
+            />
           </div>
 
           <div class="flex items-center justify-between border-t border-border/60 px-5 py-3 text-xs text-muted-foreground">

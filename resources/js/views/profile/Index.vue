@@ -17,6 +17,7 @@ import Textarea from '@/js/components/ui/textarea/Textarea.vue'
 import { useToast } from '@/js/components/ui/toast/use-toast'
 import { SUPPORTED_CURRENCIES, normalizeCurrency } from '@/js/lib/currency'
 import { useAuthStore } from '@/js/stores/auth'
+import BasePasswordInput from '@/js/components/base/BasePasswordInput.vue'
 
 const { toast } = useToast()
 const authStore = useAuthStore()
@@ -268,9 +269,8 @@ const getValidationError = (validation, serverError) => {
           <form class="space-y-4" @submit.prevent="updatePassword">
             <div class="grid gap-2">
               <Label required for="current_password">Current Password</Label>
-              <Input
+              <BasePasswordInput
                 id="current_password"
-                type="password"
                 v-model="passwordForm.current_password"
                 :error="getValidationError(passwordV$.current_password, passwordErrors.current_password)"
               />
@@ -278,9 +278,8 @@ const getValidationError = (validation, serverError) => {
 
             <div class="grid gap-2">
               <Label required for="new_password">New Password</Label>
-              <Input
+              <BasePasswordInput
                 id="new_password"
-                type="password"
                 v-model="passwordForm.password"
                 :error="getValidationError(passwordV$.password, passwordErrors.password)"
               />
@@ -288,9 +287,8 @@ const getValidationError = (validation, serverError) => {
 
             <div class="grid gap-2">
               <Label required for="password_confirmation">Confirm Password</Label>
-              <Input
+              <BasePasswordInput
                 id="password_confirmation"
-                type="password"
                 v-model="passwordForm.password_confirmation"
                 :error="getValidationError(passwordV$.password_confirmation, passwordErrors.password_confirmation)"
               />

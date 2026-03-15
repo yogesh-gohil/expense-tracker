@@ -9,11 +9,22 @@ export const useCopilotStore = defineStore({
     isLoading: false,
     error: null,
     abortController: null as AbortController | null,
+    isPaletteOpen: false,
   }),
   actions: {
     reset() {
       this.result = null
       this.error = null
+    },
+    openPalette() {
+      this.reset()
+      this.prompt = ''
+      this.isPaletteOpen = true
+    },
+    closePalette() {
+      this.isPaletteOpen = false
+      this.reset()
+      this.prompt = ''
     },
     stop() {
       if (this.abortController) {
