@@ -8,7 +8,7 @@ COPY public ./public
 COPY vite.config.js tsconfig.json postcss.config.js tailwind.config.js components.json ./
 RUN yarn build
 
-FROM php:8.3-cli
+FROM php:8.4-cli
 WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_MEMORY_LIMIT=-1
