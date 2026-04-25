@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CopilotException;
 use App\Services\ExpenseCopilotService;
 use Illuminate\Http\Request;
 
@@ -17,12 +18,12 @@ class ExpenseCopilotController extends Controller
             'prompt' => 'required|string',
         ]);
 
-        $result = $this->copilotService->analyze($validated['prompt'], $request->user());
-
-        if (isset($result['error'])) {
+        try {
+            $result = $this->copilotService->analyze($validated['prompt'], $request->user());
+        } catch (CopilotException $exception) {
             return response()->json(
-                ['error' => $result['error'], 'details' => $result['details'] ?? null],
-                $result['status'] ?? 500,
+                ['error' => $exception->getMessage(), 'details' => $exception->details()],
+                $exception->status(),
             );
         }
 

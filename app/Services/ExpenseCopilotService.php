@@ -2,136 +2,118 @@
 
 namespace App\Services;
 
+use App\Ai\Agents\TransactionExtractorAgent;
 use App\DTO\Copilot\CopilotResultData;
+use App\DTO\Copilot\TransactionExtractionData;
+use App\Exceptions\CopilotException;
 use App\Models\Category;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Str;
+use Laravel\Ai\Responses\StructuredAgentResponse;
+use Throwable;
 
 class ExpenseCopilotService
 {
     public function analyze(string $prompt, User $user): array
     {
-        $apiKey = env('OPENROUTER_API_KEY');
-        $apiBaseUrl = env('OPENROUTER_API_BASE_URL', 'https://openrouter.ai/api/v1');
-        $model = env('OPENROUTER_MODEL', 'openrouter/free');
-        
-        if (! $apiKey) {
-            return [
-                'error' => 'OPENROUTER_API_KEY is not configured.',
-                'status' => 422,
-            ];
+        if (! config('ai.copilot.enabled', true)) {
+            throw new CopilotException('Expense copilot is currently disabled.', 503);
         }
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$apiKey,
-            'HTTP-Referer' => url('/'),
-            'X-Title' => 'Expense Tracker AI',
-        ])->post($apiBaseUrl.'/chat/completions', [
-            'model' => $model,
-            'messages' => [
-                ['role' => 'system', 'content' => $this->systemPrompt()],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'response_format' => [
-                'type' => 'json_schema',
-                'json_schema' => [
-                    'name' => 'transaction_schema',
-                    'schema' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'type' => ['type' => 'string', 'enum' => ['income', 'expense']],
-                            'amount' => ['type' => 'number'],
-                            'currency' => ['type' => 'string'],
-                            'category' => ['type' => 'string'],
-                            'date' => ['type' => 'string'],
-                            'title' => ['type' => 'string'],
-                            'description' => ['type' => 'string'],
-                            'source' => ['type' => 'string'],
-                            'vendor' => ['type' => 'string'],
-                            'notes' => ['type' => 'string'],
-                        ],
-                        'required' => ['type', 'amount', 'category', 'date'],
-                    ],
-                ],
-            ],
-        ]);
+        $provider = config('ai.copilot.provider', 'openrouter');
+        $providerKey = config("ai.providers.{$provider}.key");
 
-        if (! $response->successful()) {
-            $payload = [
-                'error' => 'AI request failed',
-                'status' => $response->status(),
-            ];
-            if (config('app.debug')) {
-                $payload['details'] = $response->json() ?? $response->body();
-            }
-
-            return $payload;
+        if (! $providerKey) {
+            throw new CopilotException(strtoupper($provider).' API key is not configured.', 422);
         }
 
-        $content = $response->json('choices.0.message.content');
-        $data = json_decode($content, true);
-
-        if (! is_array($data)) {
-            return [
-                'error' => 'AI response was not valid JSON',
-                'status' => 422,
-            ];
-        }
-
-        $type = $data['type'] ?? 'expense';
-        $categoryType = strtolower((string) $type) === 'income'
-            ? Category::TYPE_INCOME
-            : Category::TYPE_EXPENSE;
-        $categoryName = isset($data['category']) ? trim((string) $data['category']) : null;
-        $categoryMatch = $categoryName
-            ? $this->findCategoryMatch((int) $user->id, $categoryType, $categoryName)
-            : null;
-
-        $userCurrency = strtoupper((string) ($user->currency ?? 'USD'));
-        $currency = $data['currency'] ?? $userCurrency;
-
-        $result = new CopilotResultData(
-            type: $type,
-            amount: $data['amount'] ?? null,
-            currency: $currency ? strtoupper((string) $currency) : $userCurrency,
-            category: $categoryName ? Str::title($categoryName) : null,
-            categoryType: $categoryType,
-            categoryMatch: $categoryMatch,
-            date: $data['date'] ?? now()->toDateString(),
-            title: $data['title'] ?? null,
-            description: $data['description'] ?? $data['notes'] ?? null,
-            source: $data['source'] ?? null,
-            vendor: $data['vendor'] ?? null,
-            rawPrompt: $prompt,
-        );
+        $extraction = $this->extractTransaction($prompt, $user);
+        $result = $this->mapExtractionToResult($extraction, $prompt, $user);
 
         return [
             'data' => $result,
         ];
     }
 
-    private function systemPrompt(): string
+    private function extractTransaction(string $prompt, User $user): TransactionExtractionData
     {
-        return implode("\n", [
-            'You extract a single transaction from the user message and respond ONLY with JSON that matches the provided schema.',
-            'Classify type as "expense" or "income".',
-            'Amount: return a number (no currency symbols). If multiple amounts appear, pick the most likely transaction amount.',
-            'Currency: use the currency code if explicitly mentioned (USD, INR, EUR, GBP, CAD, AUD). If not mentioned, leave empty.',
-            'Category: choose a short, human-friendly category (e.g., Food, Transport, Rent, Shopping, Salary, Freelance, Bills, Entertainment, Travel, Health, Education).',
-            'Title: create a concise title (3-6 words) describing the transaction. Prefer vendor/source + category.',
-            'Description: optional, short notes if helpful.',
-            'Date rules (IMPORTANT):',
-            '- If the user explicitly mentions a date, convert it to ISO YYYY-MM-DD.',
-            '- If the user uses relative dates like today, yesterday, tomorrow, last Friday, next Monday, etc., resolve them based on TODAY = '.$this->todayDate().'.',
-            '- If no date is mentioned, set date to TODAY = '.$this->todayDate().'.',
-            'Never invent a date that is not grounded in the message or TODAY.',
-        ]);
+        $transactionAgent = TransactionExtractorAgent::make(
+            user: $user,
+            categoryNames: $this->categoryNamesForUser($user),
+        );
+
+        try {
+            $response = $transactionAgent->prompt($prompt);
+        } catch (RequestException $exception) {
+            throw new CopilotException(
+                'AI request failed',
+                $exception->response?->status() ?? 502,
+                config('app.debug') ? ($exception->response?->json() ?? $exception->response?->body()) : null,
+            );
+        } catch (Throwable $exception) {
+            throw new CopilotException(
+                'AI request failed',
+                502,
+                config('app.debug') ? $exception->getMessage() : null,
+            );
+        }
+
+        if (! $response instanceof StructuredAgentResponse) {
+            throw new CopilotException('AI response was not valid structured data', 422);
+        }
+
+        $data = $response->toArray();
+
+        if (! is_array($data)) {
+            throw new CopilotException('AI response was not valid structured data', 422);
+        }
+
+        return TransactionExtractionData::fromArray($data);
     }
 
-    private function todayDate(): string
+    private function mapExtractionToResult(TransactionExtractionData $extraction, string $prompt, User $user): CopilotResultData
     {
-        return now()->toDateString();
+        $type = strtolower($extraction->type) === 'income' ? 'income' : 'expense';
+        $categoryType = $type === 'income'
+            ? Category::TYPE_INCOME
+            : Category::TYPE_EXPENSE;
+        $categoryName = $extraction->category;
+        $categoryMatch = $categoryName
+            ? $this->findCategoryMatch((int) $user->id, $categoryType, $categoryName)
+            : null;
+
+        $userCurrency = strtoupper((string) ($user->currency ?? 'USD'));
+        $currency = $extraction->currency ? strtoupper($extraction->currency) : $userCurrency;
+
+        return new CopilotResultData(
+            type: $type,
+            amount: $extraction->amount,
+            currency: $currency,
+            category: $categoryName ? Str::title($categoryName) : null,
+            categoryType: $categoryType,
+            categoryMatch: $categoryMatch,
+            date: $extraction->date ?: now()->toDateString(),
+            title: $extraction->title,
+            description: $extraction->description ?? $extraction->notes,
+            source: $extraction->source,
+            vendor: $extraction->vendor,
+            rawPrompt: $prompt,
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function categoryNamesForUser(User $user): array
+    {
+        return Category::query()
+            ->where('user_id', $user->id)
+            ->orderBy('name')
+            ->pluck('name')
+            ->filter(fn ($name) => is_string($name) && trim($name) !== '')
+            ->values()
+            ->all();
     }
 
     private function findCategoryMatch(int $userId, string $type, string $name): ?array
