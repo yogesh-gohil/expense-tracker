@@ -67,6 +67,7 @@ return [
 
         'bedrock' => [
             'driver' => 'bedrock',
+            'requires_key' => false,
             'region' => env('AWS_BEDROCK_REGION', 'us-east-1'),
             'key' => env('AWS_BEARER_TOKEN_BEDROCK'),
             'access_key_id' => env('AWS_ACCESS_KEY_ID'),
@@ -115,6 +116,7 @@ return [
 
         'ollama' => [
             'driver' => 'ollama',
+            'requires_key' => false,
             'key' => env('OLLAMA_API_KEY', ''),
             'url' => env('OLLAMA_URL', 'http://localhost:11434'),
         ],

@@ -17,15 +17,18 @@ class ExpenseCopilotService
 {
     public function analyze(string $prompt, User $user): array
     {
-        if (! config('ai.copilot.enabled', true)) {
-            throw new CopilotException('Expense copilot is currently disabled.', 503);
+        $provider = config('ai.copilot.provider', 'openrouter');
+        $providerConfig = config("ai.providers.{$provider}");
+
+        if (! $providerConfig) {
+            throw new CopilotException("AI provider [{$provider}] is not configured.", 422);
         }
 
-        $provider = config('ai.copilot.provider', 'openrouter');
-        $providerKey = config("ai.providers.{$provider}.key");
+        $requiresKey = $providerConfig['requires_key'] ?? true;
+        $providerKey = $providerConfig['key'] ?? null;
 
-        if (! $providerKey) {
-            throw new CopilotException(strtoupper($provider).' API key is not configured.', 422);
+        if ($requiresKey && empty($providerKey)) {
+            throw new CopilotException(strtoupper($provider) . ' API key is not configured.', 422);
         }
 
         $extraction = $this->extractTransaction($prompt, $user);
