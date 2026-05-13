@@ -97,8 +97,8 @@ const onSubmit = async () => {
         </DialogDescription>
       </DialogHeader>
       <form @submit.prevent="onSubmit">
-        <div class="grid gap-4">
-          <div class="grid gap-2">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="income-title">Title</Label>
             <Input
               id="income-title"
@@ -107,7 +107,7 @@ const onSubmit = async () => {
             />
           </div>
 
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="income-category">Category</Label>
             <Select
               v-model="incomeStore.incomeData.category_id"
@@ -124,7 +124,7 @@ const onSubmit = async () => {
             </Select>
           </div>
 
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="income-amount">Amount</Label>
             <Input
               id="income-amount"
@@ -134,7 +134,7 @@ const onSubmit = async () => {
             />
           </div>
 
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="income-date">Date</Label>
             <BaseDatePicker v-model="incomeStore.incomeData.date" />
             <span v-if="v$.date.$error" class="text-sm text-red-500">
@@ -142,7 +142,7 @@ const onSubmit = async () => {
             </span>
           </div>
 
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label for="income-description">Description</Label>
             <Textarea id="income-description" v-model="incomeStore.incomeData.description" />
           </div>

@@ -82,8 +82,8 @@ const onSubmit = async () => {
       </DialogHeader>
       <form @submit.prevent="onSubmit">
 
-        <div class="grid gap-4">
-          <div class="grid gap-2">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="name">Name</Label>
             <Input
               v-model="categoryStore.categoryData.name"
@@ -91,7 +91,7 @@ const onSubmit = async () => {
               id="name"
             />
           </div>
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label required for="name">Type</Label>
             <Select v-model="categoryStore.categoryData.type">
               <SelectTrigger>
@@ -107,7 +107,7 @@ const onSubmit = async () => {
               </SelectContent>
             </Select>
           </div>
-          <div class="grid gap-2">
+          <div class="grid gap-2 sm:col-span-2">
             <Label for="description">Description</Label>
             <Textarea
               v-model="categoryStore.categoryData.description"

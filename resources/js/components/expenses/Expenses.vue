@@ -166,17 +166,19 @@ watch(
         @delete="requestDelete(expense)"
       >
         <template #title>
-          <div class="flex items-center justify-between space-x-4">
-            <span>{{ expense.title }}</span>
-            <span class="text-primary">{{ formatMoney(expense.amount) }}</span>
-            <Badge
-              variant="outline"
-              class="gap-2"
-              :class="categoryTone(expense.category?.name).border"
-            >
-              <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(expense.category?.name).dot"></span>
-              <span :class="categoryTone(expense.category?.name).text">{{ expense.category?.name ?? '—' }}</span>
-            </Badge>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+            <span class="truncate">{{ expense.title }}</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-primary text-sm sm:text-base">{{ formatMoney(expense.amount) }}</span>
+              <Badge
+                variant="outline"
+                class="gap-1 text-xs"
+                :class="categoryTone(expense.category?.name).border"
+              >
+                <span class="inline-block h-2 w-2 rounded-full" :class="categoryTone(expense.category?.name).dot"></span>
+                <span :class="categoryTone(expense.category?.name).text">{{ expense.category?.name ?? '—' }}</span>
+              </Badge>
+            </div>
           </div>
         </template>
         <template #description>
@@ -185,7 +187,7 @@ watch(
       </CardItem>
     </div>
     <div v-else>
-      <div class="rounded-lg border bg-card overflow-hidden">
+      <div class="rounded-lg border bg-card overflow-x-auto">
         <Table unstyled>
         <TableHeader>
           <TableRow>
