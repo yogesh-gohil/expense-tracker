@@ -54,7 +54,7 @@ const onSubmit = () => {
         title: 'Success',
         description: 'Logged in successfully.',
       })
-      router.replace({ name: 'dashboard' })
+      router.replace('/admin/dashboard')
     })
     .finally(() => {
       isSubmitting.value = false

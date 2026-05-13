@@ -8,32 +8,32 @@ const menus= [
   {
     title: 'Dashboard',
     icon: Home,
-    link: '/dashboard'
+    link: '/admin/dashboard'
   },
   {
     title: 'Categories',
     icon: Package,
-    link: '/categories'
+    link: '/admin/categories'
   },
   {
     title: 'Expenses',
     icon: HandCoins,
-    link: '/expenses'
+    link: '/admin/expenses'
   },
   {
     title: 'Incomes',
     icon: CircleDollarSign,
-    link: '/incomes'
+    link: '/admin/incomes'
   },
   {
     title: 'Monthly Summary',
     icon: BarChart3,
-    link: '/monthly-summary'
+    link: '/admin/monthly-summary'
   },
   {
     title: 'Profile',
     icon: UserRound,
-    link: '/profile'
+    link: '/admin/profile'
   },
 ]
 

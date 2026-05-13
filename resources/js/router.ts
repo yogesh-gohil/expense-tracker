@@ -2,8 +2,24 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 
 const routes = [
+  // Landing page for unauthenticated users
   {
     path: '/',
+    component: () => import('@/js/views/layouts/LayoutLanding.vue'),
+    meta: {
+      requiresAuth: false,
+      redirectIfAuthenticated: true,
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/js/views/LandingPage.vue'),
+      },
+    ],
+  },
+  // Auth routes
+  {
+    path: '/auth',
     component: () => import('@/js/views/auth/layouts/LayoutLogin.vue'),
     meta: {
       requiresAuth: false,
@@ -38,9 +54,9 @@ const routes = [
     ],
   },
 
-  // Dashboard routes
+  // Dashboard routes (under /admin)
   {
-    path: '/',
+    path: '/admin',
     name: 'home',
     component: () => import('@/js/views/layouts/LayoutDashboard.vue'),
     meta: {
