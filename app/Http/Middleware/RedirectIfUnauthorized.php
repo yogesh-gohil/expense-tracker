@@ -20,6 +20,6 @@ class RedirectIfUnauthorized
             return $next($request);
         }
 
-        return redirect('/login?redirect='.$request->getPathInfo());
+        return redirect()->route('login', ['redirect' => $request->getPathInfo()]);
     }
 }

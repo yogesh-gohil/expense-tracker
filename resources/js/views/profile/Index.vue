@@ -26,7 +26,7 @@ const isSaving = ref(false)
 const isUpdatingPassword = ref(false)
 
 const breadcrumbData = [
-  { title: 'Home', href: '/dashboard', active: false },
+  { title: 'Home', to: { name: 'dashboard' }, active: false },
   { title: 'Profile', href: '', active: true },
 ]
 

@@ -22,7 +22,7 @@ const selectedMonth = ref(String(now.getMonth() + 1))
 const selectedYear = ref(String(now.getFullYear()))
 
 const breadcrumbData = [
-  { title: 'Home', href: '/dashboard', active: false },
+  { title: 'Home', to: { name: 'dashboard' }, active: false },
   { title: 'Monthly Summary', href: '', active: true },
 ]
 

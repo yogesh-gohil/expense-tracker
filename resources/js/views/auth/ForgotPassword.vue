@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/js/
       </CardDescription>
     </CardHeader>
     <CardContent class="text-sm">
-      <router-link to="/login" class="underline">
+      <router-link :to="{ name: 'login' }" class="underline">
         Back to login
       </router-link>
     </CardContent>

@@ -92,8 +92,8 @@ const stats = [
             <Moon v-else class="h-5 w-5" />
           </button>
           <div class="flex items-center gap-2">
-            <Button variant="ghost" @click="router.push('/auth/login')" class="hover:translate-x-1 transition-transform">Login</Button>
-            <Button @click="router.push('/auth/register')" class="hover:scale-105 transition-transform">Get Started</Button>
+            <Button variant="ghost" @click="router.push({ name: 'login' })" class="hover:translate-x-1 transition-transform">Login</Button>
+            <Button @click="router.push({ name: 'register' })" class="hover:scale-105 transition-transform">Get Started</Button>
           </div>
         </div>
       </div>
@@ -123,11 +123,11 @@ const stats = [
 
             <!-- CTA Buttons -->
             <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10 animate-fade-in-up animation-delay-600">
-              <Button size="lg" class="gap-2 group hover:scale-105 transition-all duration-300 shadow-lg shadow-sky-500/25" @click="router.push('/auth/register')">
+              <Button size="lg" class="gap-2 group hover:scale-105 transition-all duration-300 shadow-lg shadow-sky-500/25" @click="router.push({ name: 'register' })">
                 Start Free
                 <ArrowRight class="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button size="lg" variant="outline" @click="router.push('/auth/login')" class="border-sky-500/50 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 hover:border-sky-500 hover:text-sky-600 dark:hover:text-sky-300 transition-all duration-300">
+              <Button size="lg" variant="outline" @click="router.push({ name: 'login' })" class="border-sky-500/50 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 hover:border-sky-500 hover:text-sky-600 dark:hover:text-sky-300 transition-all duration-300">
                 Sign In
               </Button>
             </div>
@@ -302,7 +302,7 @@ const stats = [
           <p class="text-muted-foreground text-lg mb-8 animate-fade-in-up animation-delay-200">
             Join thousands of users who track their expenses smarter with AI-powered insights.
           </p>
-          <Button size="lg" class="gap-2 group hover:scale-105 transition-all duration-300 animate-fade-in-up animation-delay-400" @click="router.push('/auth/register')">
+          <Button size="lg" class="gap-2 group hover:scale-105 transition-all duration-300 animate-fade-in-up animation-delay-400" @click="router.push({ name: 'register' })">
             Create Free Account
             <ArrowRight class="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>

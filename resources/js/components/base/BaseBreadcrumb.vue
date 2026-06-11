@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/js/components/ui/breadcrumb'
+import { RouterLink } from 'vue-router'
 
 defineProps({
   data: {
@@ -20,8 +21,10 @@ defineProps({
   <Breadcrumb>
     <BreadcrumbList>
       <BreadcrumbItem v-for="(item,index) in data">
-        <BreadcrumbLink v-if="!item?.active" :href="item.href">
-          {{ item?.title }}
+        <BreadcrumbLink v-if="!item?.active" as-child>
+          <RouterLink :to="item.to || item.href">
+            {{ item?.title }}
+          </RouterLink>
         </BreadcrumbLink>
         <BreadcrumbPage v-else>
           {{item.title}}

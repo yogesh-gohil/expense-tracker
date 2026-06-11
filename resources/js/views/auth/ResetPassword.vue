@@ -21,7 +21,7 @@ const token = computed(() => String(route.params.token || ''))
       <p v-if="token" class="break-all">
         Token: {{ token }}
       </p>
-      <router-link to="/login" class="underline">
+      <router-link :to="{ name: 'login' }" class="underline">
         Back to login
       </router-link>
     </CardContent>

@@ -112,7 +112,7 @@ const onSubmit = async () => {
       </form>
       <div class="mt-4 text-center text-sm">
         Already have an account?
-        <router-link to="/login" class="underline">
+        <router-link :to="{ name: 'login' }" class="underline">
           Login
         </router-link>
       </div>

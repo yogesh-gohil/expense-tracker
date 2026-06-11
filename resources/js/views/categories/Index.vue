@@ -9,7 +9,7 @@ import Categories from '@/js/components/categories/Categories.vue'
 const categoryStore = useCategoryStore()
 
 const breadcrumbData = [
-  { title: 'Home', href:"/dashboard", active: false },
+  { title: 'Home', to: { name: 'dashboard' }, active: false },
   { title: 'Categories', href:"", active: true },
 ]
 </script>

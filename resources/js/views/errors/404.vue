@@ -2,13 +2,13 @@
   <div class="w-full h-screen">
     <div class="flex items-center justify-center w-full h-full">
       <div class="flex flex-col items-center justify-center">
-        <h1 class="text-primary-500 text-[10rem]">
+        <h1 class="text-primary text-[10rem] font-bold">
           404
         </h1>
-        <h5 class="mb-10 text-3xl text-primary-500">
+        <h5 class="mb-10 text-3xl text-muted-foreground">
           Whoops! You got Lost!
         </h5>
-        <a
+        <router-link
           class="
             flex
             items-center
@@ -22,14 +22,15 @@
             text-center text-white
             rounded
             whitespace-nowrap
-            bg-primary-500
+            bg-primary
+            text-primary-foreground
             btn-lg
-            hover:text-white
+            hover:opacity-90
           "
-          href="/"
+          :to="{ name: 'dashboard' }"
         >
           GO HOME
-        </a>
+        </router-link>
       </div>
     </div>
   </div>

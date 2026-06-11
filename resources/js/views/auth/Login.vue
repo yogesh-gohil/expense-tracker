@@ -54,7 +54,7 @@ const onSubmit = () => {
         title: 'Success',
         description: 'Logged in successfully.',
       })
-      router.replace('/admin/dashboard')
+      router.replace({ name: 'dashboard' })
     })
     .finally(() => {
       isSubmitting.value = false
@@ -114,7 +114,7 @@ const onSubmit = () => {
       </form>
       <div class="mt-4 text-center text-sm">
         Don't have an account?
-        <router-link to="/register" class="underline">
+        <router-link :to="{ name: 'register' }" class="underline">
           Sign up
         </router-link>
       </div>

@@ -20,7 +20,7 @@ const isTableView = computed({
 })
 
 const breadcrumbData = [
-  { title: 'Home', href:"/dashboard", active: false },
+  { title: 'Home', to: { name: 'dashboard' }, active: false },
   { title: 'Expenses', href:"", active: true },
 ]
 

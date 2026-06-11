@@ -67,11 +67,11 @@ export const useAuthStore = defineStore({
         axios
           .post('/logout')
           .then((response) => {
-            router.replace('/login')
+            router.replace({ name: 'login' })
             resolve(response)
           })
           .catch((err) => {
-            router.replace('/login')
+            router.replace({ name: 'login' })
             reject(err)
           })
       })

@@ -8,37 +8,37 @@ const menus= [
   {
     title: 'Dashboard',
     icon: Home,
-    link: '/admin/dashboard'
+    name: 'dashboard',
   },
   {
     title: 'Categories',
     icon: Package,
-    link: '/admin/categories'
+    name: 'categories',
   },
   {
     title: 'Expenses',
     icon: HandCoins,
-    link: '/admin/expenses'
+    name: 'expenses',
   },
   {
     title: 'Incomes',
     icon: CircleDollarSign,
-    link: '/admin/incomes'
+    name: 'incomes',
   },
   {
     title: 'Monthly Summary',
     icon: BarChart3,
-    link: '/admin/monthly-summary'
+    name: 'monthly-summary',
   },
   {
     title: 'Profile',
     icon: UserRound,
-    link: '/admin/profile'
+    name: 'profile',
   },
 ]
 
-const activeRoute = (path) => {
-  return route.path.includes(path)
+const activeRoute = (name) => {
+  return route.name === name
 }
 </script>
 
@@ -46,9 +46,9 @@ const activeRoute = (path) => {
     <nav class="grid items-start px-2 text-sm font-medium lg:px-4">
       <router-link
         v-for="menu in menus"
-        :to="menu.link"
+        :to="{ name: menu.name }"
         class="flex items-center gap-3 rounded-lg px-3 py-2 mt-2 text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-accent/70"
-        :class="{'bg-muted text-primary': activeRoute(menu.link)}"
+        :class="{ 'bg-muted text-primary': activeRoute(menu.name) }"
         @click="emit('navigate')"
       >
         <component :is="menu.icon" class="h-4 w-4" />

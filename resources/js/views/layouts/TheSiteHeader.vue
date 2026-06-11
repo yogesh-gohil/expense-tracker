@@ -52,9 +52,9 @@ onBeforeUnmount(() => {
       <div class="flex min-w-0 flex-1 items-center gap-3">
         <!-- Mobile Sidebar -->
 
-        <a href="/dashboard" class="md:hidden">
+        <RouterLink :to="{ name: 'dashboard' }" class="md:hidden">
           <AppLogo />
-        </a>
+        </RouterLink>
 
         <Sheet v-model:open="isMobileNavOpen">
           <SheetTrigger as-child>
@@ -69,9 +69,9 @@ onBeforeUnmount(() => {
           </SheetTrigger>
         <SheetContent side="left" class="flex flex-col p-0">
             <div class="flex h-14 items-center border-b px-4">
-              <a href="/dashboard" class="font-semibold">
+              <RouterLink :to="{ name: 'dashboard' }" class="font-semibold">
                 <AppLogo />
-              </a>
+              </RouterLink>
             </div>
             <div class="flex-1 px-2">
               <Sidebar @navigate="closeMobileNav" />
@@ -111,7 +111,7 @@ onBeforeUnmount(() => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem @click="router.push('/profile')">Profile</DropdownMenuItem>
+            <DropdownMenuItem @click="router.push({ name: 'profile' })">Profile</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem @click="authStore.logout">Logout</DropdownMenuItem>
           </DropdownMenuContent>
